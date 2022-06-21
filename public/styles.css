@@ -1,0 +1,49 @@
+body {
+    margin: 0;
+    background-color: darkgray;
+}
+
+#add-note,
+#save-workspace,
+#settings {
+    position: fixed;
+    z-index: 2147483647;
+}
+
+#add-note,
+#save-workspace {
+    border: 5px gray solid;
+}
+
+#add-note {
+    bottom: 20px;
+    right: 20px;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    font-size: 80px;
+}
+
+#save-workspace {
+    bottom: 20px;
+    left: 20px;
+    font-size: 60px;
+    border-radius: 10px;
+}
+
+#settings {
+    border: none;
+    background: none;
+    top: 20px;
+    right: 20px;
+}
+
+h1,
+h2 {
+    text-align: center;
+}
+
+#close-btn {
+    display: block;
+    margin: 0 auto;
+}

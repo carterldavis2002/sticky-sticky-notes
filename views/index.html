@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sticky Notes</title>
+    <link rel="stylesheet" href="../public/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+    <script src="../public/jquery.ui.touch-punch.js"></script>
+    <script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
+    <script defer src="../public/index.js"></script>
+</head>
+<body>
+    <div id="note-container"></div>
+    <button id="settings"><img src="../public/gear.png"></button>
+    <dialog id="settings-modal">
+        <h1>Settings</h1>
+        <input type="checkbox" id="hide-ui">Hide UI buttons (save, create note)</input>
+        <h2>Hotkeys</h2>
+        <p><kbd>Ctrl</kbd> + <kbd>s</kbd>: Save current workspace</p>
+        <p><kbd>Alt</kbd> + <kbd>n</kbd>: Create new note</p>
+        <button id="close-btn">Close</button>
+    </dialog>
+    <button id="add-note">+</button>
+    <button id="save-workspace">SAVE</button>
+</body>
+</html>

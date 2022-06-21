@@ -1,0 +1,8 @@
+BIG PICTURE ISSUES:
+-Potential for z-index to overflow, could try flipping sign somehow while
+preserving note stack order if z-index reaches a certain value
+
+POTENTIAL FEATURES:
+-Settings menu (maybe always show all notes on screen?)
+-Settings persist (new item to localStorage?)
+-Maybe fix note height and just add scroll bar?

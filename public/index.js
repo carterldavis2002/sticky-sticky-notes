@@ -1,0 +1,193 @@
+$(document).ready(() => {
+    $("#add-note").on("click", newNote);
+
+    $("#save-workspace").on("click", storeNotes);
+
+    $("#settings").on("click", () => document.querySelector("#settings-modal").showModal());
+
+    $("#close-btn").on("click", () => document.querySelector("#settings-modal").close())
+
+    $("#settings-modal > input").on("click", () => {
+        $("#add-note").toggle(!$("#hide-ui").is(":checked"));
+        $("#save-workspace").toggle(!$("#hide-ui").is(":checked"));
+    });
+
+    let notesArr = JSON.parse(localStorage.getItem("notes"));
+    if(notesArr !== null)
+    {
+        let idx = 0;
+        notesArr.forEach((item) => {
+            $("#add-note").trigger("click");
+            let note = $(".note")[idx];
+            note.style.top = item.top;
+            note.style.left = item.left;
+            note.style.backgroundColor = item.color;
+            let hexColor = '#' + item.color.slice(4,-1).split(',').map(x => (+x).toString(16).padStart(2,0)).join('');
+            $(note).children("textarea").css({"background-color": item.color});
+            $(note).children("textarea").val(item.text);
+            $(note).children("input").val(hexColor);
+            if(item.lock) $(note).children("#lock-btn").trigger("click");
+            note.style.zIndex = item.zIdx;
+            idx++;
+        });
+    }
+
+    hotkeys("ctrl+s", (e) => {
+        e.preventDefault();
+        storeNotes();
+    });
+
+    hotkeys("alt+n", (e) => {
+        e.preventDefault();
+        newNote();
+    });
+
+    $(window).on("beforeunload", (e) => {
+        let changesMade = false;
+        let unsavedStr = "You have unsaved changes";
+        const storageArr = JSON.parse(localStorage.getItem("notes"));
+        const currentNotes = $(".note");
+        if(storageArr.length !== currentNotes.length)
+            return unsavedStr;
+
+        for(let i = 0;i < storageArr.length;i++)
+        {
+            if(storageArr[i].top !== currentNotes[i].style.top || storageArr[i].left !== currentNotes[i].style.left ||
+                storageArr[i].color !== currentNotes[i].style.backgroundColor || storageArr[i].text !== $(currentNotes[i]).children("textarea").val() ||
+                storageArr[i].zIdx !== currentNotes[i].style.zIndex)
+            {
+                if(!(storageArr[i].lock && $(currentNotes[i]).children("#lock-btn").hasClass("locked")) ||
+                !(!storageArr[i].lock && !$(currentNotes[i]).children("#lock-btn").hasClass("locked")))
+                    changesMade = true;
+            }
+        }
+        
+        if(changesMade) return unsavedStr;
+    });
+});
+
+function sendNoteToFront(e) {
+    let maxIdx = 0;
+    $(".note").each((_, obj) => {
+        if(parseInt($(obj).css("z-index")) > maxIdx)
+            maxIdx = parseInt($(obj).css("z-index"));
+    });
+
+    $(e.target).css({"z-index": maxIdx + 1});
+}
+
+function triggerParentNoteClick(e) { $(e.target).parent().trigger("click"); }
+
+function storeNotes() {
+    let notesArr = [];
+    
+    $(".note").each((_, obj) => {
+        let note = {};
+        note.text = $(obj).children("textarea").val();
+        note.top = obj.style.top;
+        note.left = obj.style.left;
+        note.color = obj.style.backgroundColor;
+        note.lock = $(obj).hasClass("ui-draggable-disabled");
+        note.zIdx = $(obj).css("z-index");
+        notesArr.push(note);
+    });
+    localStorage.setItem("notes", JSON.stringify(notesArr));
+}
+
+function newNote() {
+    let note = $("<div class=\"note\"></div>");
+    note.draggable({drag: function(e, ui) {
+        $(".note").each((_, obj) => {
+            changeNoteVisibility(obj, false);
+        });
+        
+        changeNoteVisibility(e.target, true);
+
+        if(ui.position.left < 0) ui.position.left = 0;
+        if(ui.position.left + $(e.target).width() > window.innerWidth) ui.position.left = window.innerWidth - 250;
+        if(ui.position.top < 0) ui.position.top = 0;
+        if(ui.position.top + $(e.target).height() > window.innerHeight) ui.position.top = window.innerHeight - $(e.target).height();
+
+        sendNoteToFront(e);
+    }});
+    note.css({"background-color": "#FFFF88", "width": "250px", "position": "fixed", "top": "0", "left": "0", "z-index": "0"});
+
+    let deleteBtn = $("<button id=\"delete-btn\">X</button>");
+    deleteBtn.css({"position": "absolute", "right": "0", "margin": "-7px", "background-color": "#FF3131", "border": "2px #4A0404 solid",
+                    "font-weight": "bolder", "border-radius": "50%", "visibility": "hidden", "width": "25px", "height": "25px"});
+    deleteBtn.on("click", () => {
+        deleteBtn.parent().remove();
+    });
+    note.append(deleteBtn);
+
+    let colorSelect = $("<input type=\"color\" value=\"#FFFF88\"></input>");
+    colorSelect.css({"height": "50px", "width": "50px", "margin": "20px 0 5px 5px", "visibility": "hidden"});
+    note.append(colorSelect);
+
+    let lock = $("<button id=\"lock-btn\">LOCK</button>");
+    lock.on("click", () => {
+       let dragEnabled = false;
+       lock.text("UNLOCK");
+       lock.addClass("locked");
+       if(lock.parent().is(".ui-draggable-disabled")) {
+        lock.removeClass("locked");
+        dragEnabled = true;
+        lock.text("LOCK");
+       }
+       lock.parent().draggable({disabled: !dragEnabled});
+    });
+    lock.css({"float": "right", "height": "50px", "margin": "20px 5px 5px 0", "visibility": "hidden"});
+    note.append(lock);
+
+    let textArea = $("<textarea></textarea>");
+    textArea.css({"width": "inherit", "padding": "0", "border": "0", "resize": "none", "background-color": "#FFFF88",
+                "min-height": "150px", "overflow-y": "hidden", "outline": "0"});
+    textArea.on("input", () => {
+        textArea.css({"height": "auto"});
+        textArea.css({"height": textArea[0].scrollHeight + "px"});
+    });
+    textArea.on('touchstart', function() {
+        $(this).focus();
+    });
+    textArea.on("focus", (e) => triggerParentNoteClick(e))
+    note.append(textArea);
+
+    colorSelect.on("change", (e) => {
+        note.css({"background-color": e.target.value});
+        textArea.css({"background-color": e.target.value});
+    });
+
+    note.on("mouseenter", () => {
+        changeNoteVisibility(note, true);
+    }).on("mouseleave", () => {
+        changeNoteVisibility(note, false);
+    });
+
+    note.on("click", (e) => {
+        e.stopPropagation();
+        sendNoteToFront(e);
+
+        $(".note").each((_, obj) => {
+            changeNoteVisibility(obj, false);
+        });
+
+        changeNoteVisibility(note, true);
+    });
+    note.children().each((_, obj) => $(obj).on("click", triggerParentNoteClick));
+
+    $(document).on("click", () => {
+        $(".note").each((_, obj) => {
+            changeNoteVisibility(obj, false);
+        });
+    });
+
+    $("#note-container").append(note);
+}
+
+function changeNoteVisibility(note, visible) {
+    let visibility = "hidden";
+    if(visible) visibility = "visible";
+    $(note).children("#lock-btn").css({"visibility": visibility});
+    $(note).children("input").css({"visibility": visibility});
+    $(note).children("#delete-btn").css({"visibility": visibility}); 
+}
