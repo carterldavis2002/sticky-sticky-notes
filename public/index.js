@@ -12,8 +12,11 @@ class Notes {
     }
 
     undo() {
-        const command = this.history.pop();
-        command.undo(this.notesArr);
+        if(this.history.length > 0)
+        {
+            const command = this.history.pop();
+            command.undo(this.notesArr);
+        }
         console.log(this.history)
         console.log(this.notesArr)
     }
@@ -61,11 +64,6 @@ $(document).ready(() => {
         notes.executeCommand(new AddNoteCommand())
     });
 
-    hotkeys("ctrl+z", (e) => {
-        e.preventDefault();
-        notes.undo();
-    });
-
     $("#save-workspace").on("click", storeNotes);
 
     $("#settings").on("click", () => document.querySelector("#settings-modal").showModal());
@@ -82,7 +80,7 @@ $(document).ready(() => {
     {
         let idx = 0;
         notesArr.forEach((item) => {
-            $("#add-note").trigger("click");
+            addNote();
             let note = $(".note")[idx];
             note.style.top = item.top;
             note.style.left = item.left;
@@ -105,6 +103,11 @@ $(document).ready(() => {
     hotkeys("alt+n", (e) => {
         e.preventDefault();
         notes.executeCommand(new AddNoteCommand())
+    });
+
+    hotkeys("ctrl+z", (e) => {
+        e.preventDefault();
+        notes.undo();
     });
 
     $(window).on("beforeunload", (e) => {
