@@ -6,3 +6,8 @@ POTENTIAL FEATURES:
 -Settings menu (maybe always show all notes on screen?)
 -Settings persist (new item to localStorage?)
 -Maybe fix note height and just add scroll bar?
+
+UNDO COMMANDS:
+-ChangeColor (note color input change)
+-LockNote (note gets locked)
+-TextChange (text changed in note)

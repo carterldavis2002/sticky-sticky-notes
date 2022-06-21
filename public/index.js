@@ -1,5 +1,70 @@
+class Notes {
+    constructor() {
+        this.notesArr = [];
+        this.history = [];
+    }
+
+    executeCommand(command) {
+        command.execute(this.notesArr);
+        this.history.push(command);
+        console.log(this.history)
+        console.log(this.notesArr)
+    }
+
+    undo() {
+        const command = this.history.pop();
+        command.undo(this.notesArr);
+        console.log(this.history)
+        console.log(this.notesArr)
+    }
+}
+
+class AddNoteCommand {
+    constructor() {
+        this.note = null;
+    }
+
+    execute(arr) { 
+        this.note = addNote();
+        arr.push(this.note); 
+    }
+
+    undo(arr) {
+        let idx = arr.findIndex((item) => item.is(this.note));
+        arr.splice(idx, 1);
+
+        deleteNote(this.note);
+    }
+}
+
+class DeleteNoteCommand {
+    constructor(note) {
+        this.note = note;
+    }
+
+    execute(arr) {
+        let idx = arr.findIndex((item) => item.is(this.note));
+        arr.splice(idx, 1);
+
+        deleteNote(this.note);
+    }
+
+    undo(arr) {
+        addNote(this.note);
+        arr.push(this.note);
+    }
+}
+
+const notes = new Notes();
 $(document).ready(() => {
-    $("#add-note").on("click", newNote);
+    $("#add-note").on("click", () => {
+        notes.executeCommand(new AddNoteCommand())
+    });
+
+    hotkeys("ctrl+z", (e) => {
+        e.preventDefault();
+        notes.undo();
+    });
 
     $("#save-workspace").on("click", storeNotes);
 
@@ -39,7 +104,7 @@ $(document).ready(() => {
 
     hotkeys("alt+n", (e) => {
         e.preventDefault();
-        newNote();
+        notes.executeCommand(new AddNoteCommand())
     });
 
     $(window).on("beforeunload", (e) => {
@@ -96,8 +161,26 @@ function storeNotes() {
     localStorage.setItem("notes", JSON.stringify(notesArr));
 }
 
-function newNote() {
+function addNote(existingNote) {
     let note = $("<div class=\"note\"></div>");
+    let deleteBtn = $("<button id=\"delete-btn\">X</button>");
+    let colorSelect = $("<input type=\"color\" value=\"#FFFF88\"></input>");
+    let lock = $("<button id=\"lock-btn\">LOCK</button>");
+    let textArea = $("<textarea></textarea>");
+
+    let top = left = zIdx = "0";
+    if(existingNote) {
+        note = existingNote;
+        top = note.css("top");
+        left = note.css("left");
+        zIdx = note.css("z-index");
+
+        deleteBtn = existingNote.children("#delete-btn");
+        colorSelect = existingNote.children("input");
+        lock = existingNote.children("#lock-btn");
+        textArea = existingNote.children("textarea");
+    }
+
     note.draggable({drag: function(e, ui) {
         $(".note").each((_, obj) => {
             changeNoteVisibility(obj, false);
@@ -111,22 +194,19 @@ function newNote() {
         if(ui.position.top + $(e.target).height() > window.innerHeight) ui.position.top = window.innerHeight - $(e.target).height();
 
         sendNoteToFront(e);
-    }});
-    note.css({"background-color": "#FFFF88", "width": "250px", "position": "fixed", "top": "0", "left": "0", "z-index": "0"});
+    }, disabled: lock.hasClass("locked")});
+    note.css({"background-color": `${colorSelect.val()}`, "width": "250px", "position": "fixed", "top": `${top}`, "left": `${left}`, "z-index": `${zIdx}`});
 
-    let deleteBtn = $("<button id=\"delete-btn\">X</button>");
     deleteBtn.css({"position": "absolute", "right": "0", "margin": "-7px", "background-color": "#FF3131", "border": "2px #4A0404 solid",
                     "font-weight": "bolder", "border-radius": "50%", "visibility": "hidden", "width": "25px", "height": "25px"});
     deleteBtn.on("click", () => {
-        deleteBtn.parent().remove();
+        notes.executeCommand(new DeleteNoteCommand(deleteBtn.parent()));
     });
     note.append(deleteBtn);
 
-    let colorSelect = $("<input type=\"color\" value=\"#FFFF88\"></input>");
     colorSelect.css({"height": "50px", "width": "50px", "margin": "20px 0 5px 5px", "visibility": "hidden"});
     note.append(colorSelect);
 
-    let lock = $("<button id=\"lock-btn\">LOCK</button>");
     lock.on("click", () => {
        let dragEnabled = false;
        lock.text("UNLOCK");
@@ -141,8 +221,7 @@ function newNote() {
     lock.css({"float": "right", "height": "50px", "margin": "20px 5px 5px 0", "visibility": "hidden"});
     note.append(lock);
 
-    let textArea = $("<textarea></textarea>");
-    textArea.css({"width": "inherit", "padding": "0", "border": "0", "resize": "none", "background-color": "#FFFF88",
+    textArea.css({"width": "inherit", "padding": "0", "border": "0", "resize": "none", "background-color": `${colorSelect.val()}`,
                 "min-height": "150px", "overflow-y": "hidden", "outline": "0"});
     textArea.on("input", () => {
         textArea.css({"height": "auto"});
@@ -184,6 +263,7 @@ function newNote() {
     });
 
     $("#note-container").append(note);
+    return note;
 }
 
 function changeNoteVisibility(note, visible) {
@@ -192,4 +272,8 @@ function changeNoteVisibility(note, visible) {
     $(note).children("#lock-btn").css({"visibility": visibility});
     $(note).children("input").css({"visibility": visibility});
     $(note).children("#delete-btn").css({"visibility": visibility}); 
+}
+
+function deleteNote(note) {
+    note.remove();
 }
