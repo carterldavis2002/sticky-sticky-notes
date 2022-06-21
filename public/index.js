@@ -58,6 +58,24 @@ class DeleteNoteCommand {
     }
 }
 
+class ChangeColorCommand {
+    constructor(note, prevColor) {
+        this.note = note;
+        this.prevColor = prevColor;
+    }
+
+    execute() {
+        const newColor = this.note.children("input").val();
+        this.note.css({"background-color": newColor});
+        this.note.children("textArea").css({"background-color": newColor});
+    }
+
+    undo() {
+        this.note.css({"background-color": this.prevColor});
+        this.note.children("textArea").css({"background-color": this.prevColor});
+    }
+}
+
 const notes = new Notes();
 $(document).ready(() => {
     $("#add-note").on("click", () => {
@@ -237,8 +255,7 @@ function addNote(existingNote) {
     note.append(textArea);
 
     colorSelect.on("change", (e) => {
-        note.css({"background-color": e.target.value});
-        textArea.css({"background-color": e.target.value});
+        notes.executeCommand(new ChangeColorCommand($(e.target).parent(), $(e.target).parent().css("background-color")));
     });
 
     note.on("mouseenter", () => {
