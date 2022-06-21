@@ -93,7 +93,7 @@ function storeNotes() {
     });
     localStorage.setItem("notes", JSON.stringify(notesArr));
 }
-//comments yes
+
 function newNote() {
     let note = $("<div class=\"note\"></div>");
     note.draggable({drag: function(e, ui) {
