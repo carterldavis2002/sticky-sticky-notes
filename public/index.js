@@ -45,8 +45,10 @@ $(document).ready(() => {
     $(window).on("beforeunload", (e) => {
         let changesMade = false;
         let unsavedStr = "You have unsaved changes";
-        const storageArr = JSON.parse(localStorage.getItem("notes"));
+        let storageArr = JSON.parse(localStorage.getItem("notes"));
+        if(storageArr === null) storageArr = [];
         const currentNotes = $(".note");
+
         if(storageArr.length !== currentNotes.length)
             return unsavedStr;
 
