@@ -1,61 +1,36 @@
 class Notes {
-    constructor() {
-        this.notesArr = [];
-        this.history = [];
-    }
+    constructor() { this.history = []; }
 
     executeCommand(command) {
-        command.execute(this.notesArr);
+        command.execute();
         this.history.push(command);
         console.log(this.history)
-        console.log(this.notesArr)
     }
 
     undo() {
         if(this.history.length > 0)
         {
             const command = this.history.pop();
-            command.undo(this.notesArr);
+            command.undo();
         }
         console.log(this.history)
-        console.log(this.notesArr)
     }
 }
 
 class AddNoteCommand {
-    constructor() {
-        this.note = null;
-    }
+    constructor() { this.note = null; }
 
-    execute(arr) { 
-        this.note = addNote();
-        arr.push(this.note); 
-    }
+    execute() { this.note = addNote(); }
 
-    undo(arr) {
-        let idx = arr.findIndex((item) => item.is(this.note));
-        arr.splice(idx, 1);
-
-        deleteNote(this.note);
-    }
+    undo() { deleteNote(this.note); }
 }
 
 class DeleteNoteCommand {
-    constructor(note) {
-        this.note = note;
-    }
+    constructor(note) { this.note = note; }
 
-    execute(arr) {
-        let idx = arr.findIndex((item) => item.is(this.note));
-        arr.splice(idx, 1);
+    execute() { deleteNote(this.note); }
 
-        deleteNote(this.note);
-    }
-
-    undo(arr) {
-        addNote(this.note);
-        arr.push(this.note);
-    }
+    undo() { addNote(this.note); }
 }
 
 class ChangeColorCommand {
@@ -67,25 +42,32 @@ class ChangeColorCommand {
     execute() {
         const newColor = this.note.children("input").val();
         this.note.css({"background-color": newColor});
-        this.note.children("textArea").css({"background-color": newColor});
+        this.note.children("textarea").css({"background-color": newColor});
     }
 
     undo() {
+        console.log(this.prevColor)
         this.note.css({"background-color": this.prevColor});
-        this.note.children("textArea").css({"background-color": this.prevColor});
+        this.note.children("textarea").css({"background-color": this.prevColor});
+        this.note.children("input").val(convertRGBToHex(this.prevColor));
     }
+}
+
+class LockNoteCommand {
+    constructor(note) { this.note = note; }
+
+    execute() { lockNote(this.note); }
+
+    undo() { lockNote(this.note); }
 }
 
 const notes = new Notes();
 $(document).ready(() => {
-    $("#add-note").on("click", () => {
-        notes.executeCommand(new AddNoteCommand())
-    });
+    $("#add-note").on("click", () => notes.executeCommand(new AddNoteCommand()))
 
     $("#save-workspace").on("click", storeNotes);
 
     $("#settings").on("click", () => document.querySelector("#settings-modal").showModal());
-
     $("#close-btn").on("click", () => document.querySelector("#settings-modal").close())
 
     $("#settings-modal > input").on("click", () => {
@@ -103,11 +85,11 @@ $(document).ready(() => {
             note.style.top = item.top;
             note.style.left = item.left;
             note.style.backgroundColor = item.color;
-            let hexColor = '#' + item.color.slice(4,-1).split(',').map(x => (+x).toString(16).padStart(2,0)).join('');
+            let hexColor = convertRGBToHex(item.color);
             $(note).children("textarea").css({"background-color": item.color});
             $(note).children("textarea").val(item.text);
             $(note).children("input").val(hexColor);
-            if(item.lock) $(note).children("#lock-btn").trigger("click");
+            if(item.lock) lockNote($(note));
             note.style.zIndex = item.zIdx;
             idx++;
         });
@@ -220,24 +202,16 @@ function addNote(existingNote) {
 
     deleteBtn.css({"position": "absolute", "right": "0", "margin": "-7px", "background-color": "#FF3131", "border": "2px #4A0404 solid",
                     "font-weight": "bolder", "border-radius": "50%", "visibility": "hidden", "width": "25px", "height": "25px"});
-    deleteBtn.on("click", () => {
-        notes.executeCommand(new DeleteNoteCommand(deleteBtn.parent()));
+    deleteBtn.on("click", (e) => {
+        notes.executeCommand(new DeleteNoteCommand($(e.target).parent()));
     });
     note.append(deleteBtn);
 
     colorSelect.css({"height": "50px", "width": "50px", "margin": "20px 0 5px 5px", "visibility": "hidden"});
     note.append(colorSelect);
 
-    lock.on("click", () => {
-       let dragEnabled = false;
-       lock.text("UNLOCK");
-       lock.addClass("locked");
-       if(lock.parent().is(".ui-draggable-disabled")) {
-        lock.removeClass("locked");
-        dragEnabled = true;
-        lock.text("LOCK");
-       }
-       lock.parent().draggable({disabled: !dragEnabled});
+    lock.on("click", (e) => {
+        notes.executeCommand(new LockNoteCommand($(e.target).parent()))
     });
     lock.css({"float": "right", "height": "50px", "margin": "20px 5px 5px 0", "visibility": "hidden"});
     note.append(lock);
@@ -251,7 +225,9 @@ function addNote(existingNote) {
     textArea.on('touchstart', function() {
         $(this).focus();
     });
-    textArea.on("focus", (e) => triggerParentNoteClick(e))
+    textArea.on("focus", (e) => { 
+        triggerParentNoteClick(e);
+    });
     note.append(textArea);
 
     colorSelect.on("change", (e) => {
@@ -294,6 +270,19 @@ function changeNoteVisibility(note, visible) {
     $(note).children("#delete-btn").css({"visibility": visibility}); 
 }
 
-function deleteNote(note) {
-    note.remove();
+function deleteNote(note) { note.remove(); }
+
+function lockNote(note) {
+    let dragEnabled = false;
+    let lock = note.children("#lock-btn");
+    lock.text("UNLOCK");
+    lock.addClass("locked");
+    if(note.is(".ui-draggable-disabled")) {
+     lock.removeClass("locked");
+     dragEnabled = true;
+     lock.text("LOCK");
+    }
+    note.draggable({disabled: !dragEnabled});
 }
+
+function convertRGBToHex(rgbStr) { return '#' + rgbStr.slice(4,-1).split(',').map(x => (+x).toString(16).padStart(2,0)).join(''); }

@@ -8,5 +8,7 @@ POTENTIAL FEATURES:
 -Maybe fix note height and just add scroll bar?
 
 UNDO COMMANDS:
--LockNote (note gets locked)
--TextChange (text changed in note)
+-Undo action message
+-Undo button (should then move added notes to center of screen)
+-Redo stack
+-Clear undo/redo stacks on save
