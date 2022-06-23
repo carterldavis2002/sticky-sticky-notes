@@ -11,4 +11,3 @@ UNDO COMMANDS:
 -Undo action message
 -Undo button (should then move added notes to center of screen)
 -Redo stack
--Clear undo/redo stacks on save

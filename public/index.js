@@ -15,6 +15,8 @@ class Notes {
         }
         console.log(this.history)
     }
+
+    clearHistory() { this.history = []; }
 }
 
 class AddNoteCommand {
@@ -30,7 +32,10 @@ class DeleteNoteCommand {
 
     execute() { deleteNote(this.note); }
 
-    undo() { addNote(this.note); }
+    undo() { 
+        $("#note-container").append(this.note);
+        changeNoteVisibility(this.note, false);
+     }
 }
 
 class ChangeColorCommand {
@@ -162,27 +167,15 @@ function storeNotes() {
         notesArr.push(note);
     });
     localStorage.setItem("notes", JSON.stringify(notesArr));
+    notes.clearHistory();
 }
 
-function addNote(existingNote) {
+function addNote() {
     let note = $("<div class=\"note\"></div>");
     let deleteBtn = $("<button id=\"delete-btn\">X</button>");
     let colorSelect = $("<input type=\"color\" value=\"#FFFF88\"></input>");
     let lock = $("<button id=\"lock-btn\">LOCK</button>");
     let textArea = $("<textarea></textarea>");
-
-    let top = left = zIdx = "0";
-    if(existingNote) {
-        note = existingNote;
-        top = note.css("top");
-        left = note.css("left");
-        zIdx = note.css("z-index");
-
-        deleteBtn = existingNote.children("#delete-btn");
-        colorSelect = existingNote.children("input");
-        lock = existingNote.children("#lock-btn");
-        textArea = existingNote.children("textarea");
-    }
 
     note.draggable({drag: function(e, ui) {
         $(".note").each((_, obj) => {
@@ -198,7 +191,7 @@ function addNote(existingNote) {
 
         sendNoteToFront(e);
     }, disabled: lock.hasClass("locked")});
-    note.css({"background-color": `${colorSelect.val()}`, "width": "250px", "position": "fixed", "top": `${top}`, "left": `${left}`, "z-index": `${zIdx}`});
+    note.css({"background-color": `${colorSelect.val()}`, "width": "250px", "position": "fixed", "top": "0", "left": "0", "z-index": "0"});
 
     deleteBtn.css({"position": "absolute", "right": "0", "margin": "-7px", "background-color": "#FF3131", "border": "2px #4A0404 solid",
                     "font-weight": "bolder", "border-radius": "50%", "visibility": "hidden", "width": "25px", "height": "25px"});
@@ -270,7 +263,7 @@ function changeNoteVisibility(note, visible) {
     $(note).children("#delete-btn").css({"visibility": visibility}); 
 }
 
-function deleteNote(note) { note.remove(); }
+function deleteNote(note) { note.detach(); }
 
 function lockNote(note) {
     let dragEnabled = false;
