@@ -3,15 +3,12 @@ body {
     background-color: darkgray;
 }
 
-#add-note,
-#save-workspace,
-#settings {
+.fixed-front{
     position: fixed;
     z-index: 2147483647;
 }
 
-#add-note,
-#save-workspace {
+.gray-border {
     border: 5px gray solid;
 }
 
@@ -32,8 +29,6 @@ body {
 }
 
 #settings {
-    border: none;
-    background: none;
     top: 20px;
     right: 20px;
 }
@@ -46,4 +41,20 @@ h2 {
 #close-btn {
     display: block;
     margin: 0 auto;
+}
+
+button,
+input {
+    cursor: pointer;
+}
+
+.img-btn {
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+#undo-btn {
+    bottom: 111px;
+    left: 20px;
 }

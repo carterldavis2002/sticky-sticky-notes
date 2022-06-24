@@ -68,16 +68,33 @@ class LockNoteCommand {
 
 const notes = new Notes();
 $(document).ready(() => {
-    $("#add-note").on("click", () => notes.executeCommand(new AddNoteCommand()))
+    $("#add-note").on("click", () => notes.executeCommand(new AddNoteCommand()));
 
     $("#save-workspace").on("click", storeNotes);
 
     $("#settings").on("click", () => document.querySelector("#settings-modal").showModal());
-    $("#close-btn").on("click", () => document.querySelector("#settings-modal").close())
+    $("#close-btn").on("click", () => document.querySelector("#settings-modal").close());
 
     $("#settings-modal > input").on("click", () => {
         $("#add-note").toggle(!$("#hide-ui").is(":checked"));
         $("#save-workspace").toggle(!$("#hide-ui").is(":checked"));
+    });
+
+    $("#undo-btn").on("click", () => notes.undo());
+
+    hotkeys("ctrl+s", (e) => {
+        e.preventDefault();
+        storeNotes();
+    });
+
+    hotkeys("alt+n", (e) => {
+        e.preventDefault();
+        notes.executeCommand(new AddNoteCommand())
+    });
+
+    hotkeys("ctrl+z", (e) => {
+        e.preventDefault();
+        notes.undo();
     });
 
     let notesArr = JSON.parse(localStorage.getItem("notes"));
@@ -100,24 +117,9 @@ $(document).ready(() => {
         });
     }
 
-    hotkeys("ctrl+s", (e) => {
-        e.preventDefault();
-        storeNotes();
-    });
-
-    hotkeys("alt+n", (e) => {
-        e.preventDefault();
-        notes.executeCommand(new AddNoteCommand())
-    });
-
-    hotkeys("ctrl+z", (e) => {
-        e.preventDefault();
-        notes.undo();
-    });
-
     $(window).on("beforeunload", (e) => {
         let changesMade = false;
-        let unsavedStr = "You have unsaved changes";
+        let unsavedStr = "You have unsaved changes.";
         let storageArr = JSON.parse(localStorage.getItem("notes"));
         if(storageArr === null) storageArr = [];
         const currentNotes = $(".note");
