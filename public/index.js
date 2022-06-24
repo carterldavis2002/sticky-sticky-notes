@@ -1,22 +1,42 @@
 class Notes {
-    constructor() { this.history = []; }
+    constructor() { 
+        this.history = [];
+        this.recall = [];
+    }
 
     executeCommand(command) {
         command.execute();
         this.history.push(command);
+        this.clearRecall();
         console.log(this.history)
+        console.log(this.recall)
     }
 
     undo() {
         if(this.history.length > 0)
         {
             const command = this.history.pop();
+            this.recall.push(command);
             command.undo();
         }
         console.log(this.history)
+        console.log(this.recall)
+    }
+
+    redo() {
+        if(this.recall.length > 0)
+        {
+            const command = this.recall.pop();
+            this.history.push(command);
+            command.redo();
+        }
+        console.log(this.history)
+        console.log(this.recall)
     }
 
     clearHistory() { this.history = []; }
+
+    clearRecall() { this.recall = []; }
 }
 
 class AddNoteCommand {
@@ -25,6 +45,11 @@ class AddNoteCommand {
     execute() { this.note = addNote(); }
 
     undo() { deleteNote(this.note); }
+
+    redo() { 
+        $("#note-container").append(this.note);
+        changeNoteVisibility(this.note, false);     
+    }
 }
 
 class DeleteNoteCommand {
@@ -36,25 +61,33 @@ class DeleteNoteCommand {
         $("#note-container").append(this.note);
         changeNoteVisibility(this.note, false);
      }
+
+    redo() { this.execute(); }
 }
 
 class ChangeColorCommand {
     constructor(note, prevColor) {
         this.note = note;
         this.prevColor = prevColor;
+        this.newColor = null;
     }
 
     execute() {
-        const newColor = this.note.children("input").val();
-        this.note.css({"background-color": newColor});
-        this.note.children("textarea").css({"background-color": newColor});
+        this.newColor = this.note.children("input").val();
+        this.note.css({"background-color": this.newColor});
+        this.note.children("textarea").css({"background-color": this.newColor});
     }
 
     undo() {
-        console.log(this.prevColor)
         this.note.css({"background-color": this.prevColor});
         this.note.children("textarea").css({"background-color": this.prevColor});
         this.note.children("input").val(convertRGBToHex(this.prevColor));
+    }
+
+    redo() {
+        this.note.css({"background-color": this.newColor});
+        this.note.children("textarea").css({"background-color": this.newColor});
+        this.note.children("input").val(this.newColor);
     }
 }
 
@@ -63,7 +96,9 @@ class LockNoteCommand {
 
     execute() { lockNote(this.note); }
 
-    undo() { lockNote(this.note); }
+    undo() { this.execute(); }
+
+    redo() { this.execute(); }
 }
 
 const notes = new Notes();
@@ -95,6 +130,11 @@ $(document).ready(() => {
     hotkeys("ctrl+z", (e) => {
         e.preventDefault();
         notes.undo();
+    });
+
+    hotkeys("ctrl+y", (e) => {
+        e.preventDefault();
+        notes.redo();
     });
 
     let notesArr = JSON.parse(localStorage.getItem("notes"));

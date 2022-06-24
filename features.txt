@@ -9,5 +9,4 @@ POTENTIAL FEATURES:
 
 UNDO COMMANDS:
 -Undo action message
--Undo button (should then move added notes to center of screen)
--Redo stack
+-redo button alongside undo
