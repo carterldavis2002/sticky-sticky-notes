@@ -58,3 +58,17 @@ input {
     bottom: 111px;
     left: 40px;
 }
+
+@media (max-width: 400px) {
+    #add-note {
+        width: 30vw;
+        height: 30vw;
+        font-size: 25vw;
+    }
+
+    #save-workspace {
+        width: 45vw;
+        height: 20vw;
+        font-size: 15vw;
+    }
+}

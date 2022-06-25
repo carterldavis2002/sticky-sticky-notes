@@ -19,8 +19,6 @@ class Notes {
             this.recall.push(command);
             command.undo();
         }
-        console.log(this.history)
-        console.log(this.recall)
     }
 
     redo() {
@@ -30,8 +28,6 @@ class Notes {
             this.history.push(command);
             command.redo();
         }
-        console.log(this.history)
-        console.log(this.recall)
     }
 
     clearHistory() { this.history = []; }
