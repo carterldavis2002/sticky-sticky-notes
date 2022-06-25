@@ -3,15 +3,12 @@ body {
     background-color: darkgray;
 }
 
-#add-note,
-#save-workspace,
-#settings {
+.fixed-front{
     position: fixed;
     z-index: 2147483647;
 }
 
-#add-note,
-#save-workspace {
+.gray-border {
     border: 5px gray solid;
 }
 
@@ -32,8 +29,6 @@ body {
 }
 
 #settings {
-    border: none;
-    background: none;
     top: 20px;
     right: 20px;
 }
@@ -46,4 +41,46 @@ h2 {
 #close-btn {
     display: block;
     margin: 0 auto;
+}
+
+button,
+input {
+    cursor: pointer;
+}
+
+.img-btn {
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+#history-container {
+    bottom: 111px;
+    left: 40px;
+}
+
+#history-message {
+    top: 20px;
+    right: 168px;
+    font-size: 60px;
+}
+
+@media (max-width: 400px) {
+    #add-note {
+        width: 30vw;
+        height: 30vw;
+        font-size: 25vw;
+    }
+
+    #save-workspace {
+        width: 45vw;
+        height: 20vw;
+        font-size: 15vw;
+    }
+}
+
+@media (max-width: 900px) {
+    #history-message {
+        visibility: hidden;
+    }
 }
