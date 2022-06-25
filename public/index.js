@@ -8,8 +8,6 @@ class Notes {
         command.execute();
         this.history.push(command);
         this.clearRecall();
-        console.log(this.history)
-        console.log(this.recall)
     }
 
     undo() {
@@ -18,6 +16,7 @@ class Notes {
             const command = this.history.pop();
             this.recall.push(command);
             command.undo();
+            $("#history-message").text(command.getMessage("undo"));
         }
     }
 
@@ -27,6 +26,7 @@ class Notes {
             const command = this.recall.pop();
             this.history.push(command);
             command.redo();
+            $("#history-message").text(command.getMessage("redo"));
         }
     }
 
@@ -46,6 +46,8 @@ class AddNoteCommand {
         $("#note-container").append(this.note);
         changeNoteVisibility(this.note, false);     
     }
+
+    getMessage(type) { return type === "undo" ? "Undid create note" : "Redid create note"; }
 }
 
 class DeleteNoteCommand {
@@ -59,6 +61,8 @@ class DeleteNoteCommand {
      }
 
     redo() { this.execute(); }
+
+    getMessage(type) { return type === "undo" ? "Undid delete note" : "Redid delete note"; }
 }
 
 class ChangeColorCommand {
@@ -85,6 +89,8 @@ class ChangeColorCommand {
         this.note.children("textarea").css({"background-color": this.newColor});
         this.note.children("input").val(this.newColor);
     }
+
+    getMessage(type) { return type === "undo" ? "Undid note color change" : "Redid note color change"; }
 }
 
 class LockNoteCommand {
@@ -95,6 +101,8 @@ class LockNoteCommand {
     undo() { this.execute(); }
 
     redo() { this.execute(); }
+
+    getMessage(type) { return type === "undo" ? "Undid note lock change" : "Redid note lock change"; }
 }
 
 const notes = new Notes();
@@ -109,6 +117,7 @@ $(document).ready(() => {
     $("#settings-modal > input").on("click", () => {
         $("#add-note").toggle(!$("#hide-ui").is(":checked"));
         $("#save-workspace").toggle(!$("#hide-ui").is(":checked"));
+        $("#history-container").toggle(!$("#hide-ui").is(":checked"));
     });
 
     $("#undo-btn").on("click", () => notes.undo());
@@ -208,6 +217,7 @@ function storeNotes() {
     localStorage.setItem("notes", JSON.stringify(notesArr));
     notes.clearHistory();
     notes.clearRecall();
+    $("#history-message").text("");
 }
 
 function addNote() {

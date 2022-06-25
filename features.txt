@@ -6,6 +6,3 @@ POTENTIAL FEATURES:
 -Settings menu (maybe always show all notes on screen?)
 -Settings persist (new item to localStorage?)
 -Maybe fix note height and just add scroll bar?
-
-UNDO COMMANDS:
--Undo action message

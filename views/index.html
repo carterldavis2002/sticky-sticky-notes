@@ -14,6 +14,7 @@
 </head>
 <body>
     <div id="note-container"></div>
+    <div class="fixed-front" id="history-message"></div>
     <div class="fixed-front" id="history-container">
         <button class="img-btn" id="undo-btn"><img src="../public/undo.png"></button>
         <button class="img-btn" id="redo-btn"><img src="../public/redo.png"></button>
@@ -21,11 +22,12 @@
     <button class="img-btn fixed-front" id="settings"><img src="../public/gear.png"></button>
     <dialog id="settings-modal">
         <h1>Settings</h1>
-        <input type="checkbox" id="hide-ui">Hide UI buttons (save, create note)</input>
+        <input type="checkbox" id="hide-ui">Hide UI buttons (save, create note, undo/redo)</input>
         <h2>Hotkeys</h2>
         <p><kbd>Ctrl</kbd> + <kbd>s</kbd>: Save current workspace</p>
         <p><kbd>Alt</kbd> + <kbd>n</kbd>: Create new note</p>
         <p><kbd>Ctrl</kbd> + <kbd>z</kbd>: Undo action (create/remove note, lock note, change color)</p>
+        <p><kbd>Ctrl</kbd> + <kbd>y</kbd>: Redo action (create/remove note, lock note, change color)</p>
         <button id="close-btn">Close</button>
     </dialog>
     <button class="gray-border fixed-front" id="add-note">+</button>

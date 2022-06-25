@@ -59,6 +59,12 @@ input {
     left: 40px;
 }
 
+#history-message {
+    top: 20px;
+    right: 168px;
+    font-size: 60px;
+}
+
 @media (max-width: 400px) {
     #add-note {
         width: 30vw;
@@ -70,5 +76,11 @@ input {
         width: 45vw;
         height: 20vw;
         font-size: 15vw;
+    }
+}
+
+@media (max-width: 900px) {
+    #history-message {
+        visibility: hidden;
     }
 }
