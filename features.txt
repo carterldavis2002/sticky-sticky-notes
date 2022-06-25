@@ -9,4 +9,3 @@ POTENTIAL FEATURES:
 
 UNDO COMMANDS:
 -Undo action message
--redo button alongside undo

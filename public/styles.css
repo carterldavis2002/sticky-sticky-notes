@@ -54,7 +54,7 @@ input {
     padding: 0;
 }
 
-#undo-btn {
+#history-container {
     bottom: 111px;
-    left: 20px;
+    left: 40px;
 }

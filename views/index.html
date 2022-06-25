@@ -14,7 +14,10 @@
 </head>
 <body>
     <div id="note-container"></div>
-    <button class="img-btn fixed-front" id="undo-btn"><img src="../public/undo.png"></button>
+    <div class="fixed-front" id="history-container">
+        <button class="img-btn" id="undo-btn"><img src="../public/undo.png"></button>
+        <button class="img-btn" id="redo-btn"><img src="../public/redo.png"></button>
+    </div>
     <button class="img-btn fixed-front" id="settings"><img src="../public/gear.png"></button>
     <dialog id="settings-modal">
         <h1>Settings</h1>

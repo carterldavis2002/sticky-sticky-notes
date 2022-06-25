@@ -116,6 +116,7 @@ $(document).ready(() => {
     });
 
     $("#undo-btn").on("click", () => notes.undo());
+    $("#redo-btn").on("click", () => notes.redo());
 
     hotkeys("ctrl+s", (e) => {
         e.preventDefault();
@@ -210,6 +211,7 @@ function storeNotes() {
     });
     localStorage.setItem("notes", JSON.stringify(notesArr));
     notes.clearHistory();
+    notes.clearRecall();
 }
 
 function addNote() {
