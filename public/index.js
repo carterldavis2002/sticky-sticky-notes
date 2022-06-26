@@ -112,12 +112,15 @@ $(document).ready(() => {
     $("#save-workspace").on("click", storeNotes);
 
     $("#settings").on("click", () => document.querySelector("#settings-modal").showModal());
-    $("#close-btn").on("click", () => document.querySelector("#settings-modal").close());
+    $("#close-btn").on("click", () => {
+        document.querySelector("#settings-modal").close();
+        localStorage.setItem("settings", JSON.stringify({hideUI: $("#hide-ui").is(":checked")}));
+    });
 
-    $("#settings-modal > input").on("click", () => {
-        $("#add-note").toggle(!$("#hide-ui").is(":checked"));
-        $("#save-workspace").toggle(!$("#hide-ui").is(":checked"));
-        $("#history-container").toggle(!$("#hide-ui").is(":checked"));
+    $("#hide-ui").on("click", (e) => {
+        $("#add-note").toggle(!$(e.target).is(":checked"));
+        $("#save-workspace").toggle(!$(e.target).is(":checked"));
+        $("#history-container").toggle(!$(e.target).is(":checked"));
     });
 
     $("#undo-btn").on("click", () => notes.undo());
@@ -162,6 +165,10 @@ $(document).ready(() => {
             idx++;
         });
     }
+
+    let settings = JSON.parse(localStorage.getItem("settings"));
+    if(settings && settings.hideUI)
+        $("#hide-ui").trigger("click");
 
     $(window).on("beforeunload", (e) => {
         let changesMade = false;
@@ -240,7 +247,7 @@ function addNote() {
         if(ui.position.top + $(e.target).height() > window.innerHeight) ui.position.top = window.innerHeight - $(e.target).height();
 
         sendNoteToFront(e);
-    }, disabled: lock.hasClass("locked")});
+    }, disabled: lock.hasClass("locked"), distance: 25});
     note.css({"background-color": `${colorSelect.val()}`, "width": "250px", "position": "fixed", "top": "0", "left": "0", "z-index": "0"});
 
     deleteBtn.css({"position": "absolute", "right": "0", "margin": "-7px", "background-color": "#FF3131", "border": "2px #4A0404 solid",
