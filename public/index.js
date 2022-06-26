@@ -162,6 +162,7 @@ $(document).ready(() => {
             $(note).children("input").val(hexColor);
             if(item.lock) lockNote($(note));
             note.style.zIndex = item.zIdx;
+            $(note).children("textarea").css({"height": item.textHeight});
             idx++;
         });
     }
@@ -219,6 +220,7 @@ function storeNotes() {
         note.color = obj.style.backgroundColor;
         note.lock = $(obj).hasClass("ui-draggable-disabled");
         note.zIdx = $(obj).css("z-index");
+        note.textHeight = $(obj).children("textarea").css("height");
         notesArr.push(note);
     });
     localStorage.setItem("notes", JSON.stringify(notesArr));
@@ -234,18 +236,12 @@ function addNote() {
     let lock = $("<button id=\"lock-btn\">LOCK</button>");
     let textArea = $("<textarea></textarea>");
 
-    note.draggable({drag: function(e, ui) {
+    note.draggable({drag: function(e) {
         $(".note").each((_, obj) => {
             changeNoteVisibility(obj, false);
         });
         
         changeNoteVisibility(e.target, true);
-
-        if(ui.position.left < 0) ui.position.left = 0;
-        if(ui.position.left + $(e.target).width() > window.innerWidth) ui.position.left = window.innerWidth - 250;
-        if(ui.position.top < 0) ui.position.top = 0;
-        if(ui.position.top + $(e.target).height() > window.innerHeight) ui.position.top = window.innerHeight - $(e.target).height();
-
         sendNoteToFront(e);
     }, disabled: lock.hasClass("locked"), distance: 25});
     note.css({"background-color": `${colorSelect.val()}`, "width": "250px", "position": "fixed", "top": "0", "left": "0", "z-index": "0"});
@@ -266,8 +262,8 @@ function addNote() {
     lock.css({"float": "right", "height": "50px", "margin": "20px 5px 5px 0", "visibility": "hidden"});
     note.append(lock);
 
-    textArea.css({"width": "inherit", "padding": "0", "border": "0", "resize": "none", "background-color": `${colorSelect.val()}`,
-                "min-height": "150px", "overflow-y": "hidden", "outline": "0"});
+    textArea.css({"width": "230px", "padding": "0", "border": "0", "resize": "none", "background-color": `${colorSelect.val()}`,
+                "min-height": "150px", "overflow-y": "hidden", "outline": "0", "margin": "0 10px 10px 10px"});
     textArea.on("input", () => {
         textArea.css({"height": "auto"});
         textArea.css({"height": textArea[0].scrollHeight + "px"});
