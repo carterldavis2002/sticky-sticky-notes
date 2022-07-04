@@ -1,8 +1,10 @@
 const express = require("express");
 const app = express();
 
-app.use("/public", express.static(__dirname + "/public"));
+const path = require("path");
 
-app.get("/", (_, res) => res.sendFile(__dirname + "/views/index.html"));
+app.use("/public", express.static(path.resolve("dist"))); 
 
-app.listen(process.env.PORT || 5000);
+app.get("/", (_, res) => res.sendFile(path.resolve(__dirname, "dist", "index.html")));
+
+app.listen(process.env.PORT || 3000);
