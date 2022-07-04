@@ -115,12 +115,19 @@ class LockNoteCommand {
 
 const notes = new Notes();
 $(document).ready(() => {
-    $("#add-note").on("click", () => notes.executeCommand(new AddNoteCommand()));
+    $("#add-note").on("click touchstart", (e) => {
+        e.preventDefault();
+        notes.executeCommand(new AddNoteCommand())
+    });
 
-    $("#save-workspace").on("click", storeNotes);
+    $("#save-workspace").on("click touchstart", storeNotes);
 
-    $("#settings").on("click", () => document.querySelector("#settings-modal").showModal());
-    $("#close-btn").on("click", () => {
+    $("#settings").on("click touchstart", (e) => {
+        e.preventDefault();
+        document.querySelector("#settings-modal").showModal()
+    });
+    $("#close-btn").on("click touchstart", (e) => {
+        e.preventDefault();
         document.querySelector("#settings-modal").close();
         localStorage.setItem("settings", JSON.stringify({hideUI: $("#hide-ui").is(":checked")}));
     });
@@ -131,8 +138,14 @@ $(document).ready(() => {
         $("#history-container").toggle(!$(e.target).is(":checked"));
     });
 
-    $("#undo-btn").on("click", () => notes.undo());
-    $("#redo-btn").on("click", () => notes.redo());
+    $("#undo-btn").on("click touchstart", (e) => {
+        e.preventDefault();
+        notes.undo();
+    });
+    $("#redo-btn").on("click touchstart", (e) => {
+        e.preventDefault();
+        notes.redo()
+    });
 
     hotkeys("ctrl+s", (e) => {
         e.preventDefault();
@@ -203,39 +216,29 @@ $(document).ready(() => {
         
         if(changesMade) return unsavedStr;
     });
-});
 
-function sendNoteToFront(e) {
-    let maxIdx = 0;
-    $(".note").each((_, obj) => {
-        if(parseInt($(obj).css("z-index")) > maxIdx)
-            maxIdx = parseInt($(obj).css("z-index"));
-    });
-
-    $(e.target).css({"z-index": maxIdx + 1});
-}
-
-function triggerParentNoteClick(e) { $(e.target).parent().trigger("click"); }
-
-function storeNotes() {
-    let notesArr = [];
+    function storeNotes(e) {
+        e && e.preventDefault();
     
-    $(".note").each((_, obj) => {
-        let note = {};
-        note.text = $(obj).children("textarea").val();
-        note.top = obj.style.top;
-        note.left = obj.style.left;
-        note.color = obj.style.backgroundColor;
-        note.lock = $(obj).hasClass("ui-draggable-disabled");
-        note.zIdx = $(obj).css("z-index");
-        note.textHeight = $(obj).children("textarea").css("height");
-        notesArr.push(note);
-    });
-    localStorage.setItem("notes", JSON.stringify(notesArr));
-    notes.clearHistory();
-    notes.clearRecall();
-    $("#history-message").text("");
-}
+        let notesArr = [];
+        
+        $(".note").each((_, obj) => {
+            let note = {};
+            note.text = $(obj).children("textarea").val();
+            note.top = obj.style.top;
+            note.left = obj.style.left;
+            note.color = obj.style.backgroundColor;
+            note.lock = $(obj).hasClass("ui-draggable-disabled");
+            note.zIdx = $(obj).css("z-index");
+            note.textHeight = $(obj).children("textarea").css("height");
+            notesArr.push(note);
+        });
+        localStorage.setItem("notes", JSON.stringify(notesArr));
+        notes.clearHistory();
+        notes.clearRecall();
+        $("#history-message").text("");
+    }
+});
 
 function addNote() {
     let note = $("<div class=\"note\"></div>");
@@ -250,13 +253,16 @@ function addNote() {
         });
         
         changeNoteVisibility(e.target, true);
-        sendNoteToFront(e);
+        sendNoteToFront(e.target);
     }, disabled: lock.hasClass("locked"), distance: 25});
     note.css({"background-color": `${colorSelect.val()}`, "width": "250px", "position": "fixed", "top": "0", "left": "0", "z-index": "0"});
 
     deleteBtn.css({"position": "absolute", "right": "0", "margin": "-7px", "background-color": "#FF3131", "border": "2px #4A0404 solid",
                     "font-weight": "bolder", "border-radius": "50%", "visibility": "hidden", "width": "25px", "height": "25px"});
-    deleteBtn.on("click", (e) => {
+    deleteBtn.on("click touchstart", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         notes.executeCommand(new DeleteNoteCommand($(e.target).parent()));
     });
     note.append(deleteBtn);
@@ -264,8 +270,12 @@ function addNote() {
     colorSelect.css({"height": "50px", "width": "50px", "margin": "20px 0 5px 5px", "visibility": "hidden"});
     note.append(colorSelect);
 
-    lock.on("click", (e) => {
+    lock.on("click touchstart", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         notes.executeCommand(new LockNoteCommand($(e.target).parent()))
+        sendNoteToFront($(e.target).parent());
     });
     lock.css({"float": "right", "height": "50px", "margin": "20px 5px 5px 0", "visibility": "hidden"});
     note.append(lock);
@@ -277,10 +287,10 @@ function addNote() {
         textArea.css({"height": textArea[0].scrollHeight + "px"});
     });
     textArea.on('touchstart', function() {
-        $(this).focus();
+        $(this).trigger("focus");
     });
     textArea.on("focus", (e) => { 
-        triggerParentNoteClick(e);
+        sendNoteToFront($(e.target).parent())
     });
     note.append(textArea);
 
@@ -294,9 +304,23 @@ function addNote() {
         changeNoteVisibility(note, false);
     });
 
-    note.on("click", (e) => {
+    note.on("touchstart", () => {
+        note.off("mouseleave");
+    }).on("touchend", () => {
+        $(".note").each((_, obj) => {
+            changeNoteVisibility(obj, false);
+        });
+        changeNoteVisibility(note, true);
+        note.on("mouseleave", () => changeNoteVisibility(note, false));
+    });
+
+    note.on("click touchstart", (e) => {
+        if($(e.target).is(".note"))
+            e.preventDefault();
+
         e.stopPropagation();
-        sendNoteToFront(e);
+
+        sendNoteToFront(note);
 
         $(".note").each((_, obj) => {
             changeNoteVisibility(obj, false);
@@ -304,9 +328,8 @@ function addNote() {
 
         changeNoteVisibility(note, true);
     });
-    note.children().each((_, obj) => $(obj).on("click", triggerParentNoteClick));
 
-    $(document).on("click", () => {
+    $(document).on("touchstart", () => {
         $(".note").each((_, obj) => {
             changeNoteVisibility(obj, false);
         });
@@ -314,6 +337,16 @@ function addNote() {
 
     $("#note-container").append(note);
     return note;
+
+    function sendNoteToFront(note) {
+        let maxIdx = 0;
+        $(".note").each((_, obj) => {
+            if(parseInt($(obj).css("z-index")) > maxIdx)
+                maxIdx = parseInt($(obj).css("z-index"));
+        });
+    
+        $(note).css({"z-index": maxIdx + 1});
+    }
 }
 
 function changeNoteVisibility(note, visible) {
