@@ -1,7 +1,7 @@
 {
-  "name": "sticky-note",
+  "name": "sticky-sticky-notes",
   "version": "1.0.0",
-  "description": "",
+  "description": "Easy-to-use sticky notes accessible from the browser",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -9,8 +9,7 @@
     "dev-server": "webpack-dev-server --config=webpack.config.dev.js --open",
     "build": "webpack --config=webpack.config.prod.js"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Carter Davis <carterldavis2002@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.1",
@@ -29,5 +28,9 @@
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.9.2",
     "webpack-merge": "^5.8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/carterldavis2002/sticky-sticky-notes.git"
   }
 }
