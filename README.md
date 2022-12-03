@@ -1,5 +1,5 @@
 # Sticky, Sticky Notes!
-**https://sticky-sticky-notes.herokuapp.com/**
+**https://sticky-sticky-notes.glitch.me/**
 
 Easy-to-use sticky notes accessible from the browser. Features include drag-and-drop to move sticky notes anywhere on the screen, undo/redo in case
 undesirable mistakes are made in the workspace, and saving so the notes remain just as they were left when the browser is closed and reopened later.
